@@ -19,6 +19,7 @@ const HomeScreen = ({ route }) => {
   return (
     <Tab.Navigator
       initialRouteName="Feed"
+      key="feed-tab"
       screenOptions={{
         tabBarActiveTintColor: "#e91e63",
       }}

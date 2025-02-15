@@ -21,72 +21,82 @@ import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Swiper from "react-native-swiper";
 import ItemHome from "./items/itemProduct";
-import { GET_ALL, GET_ID, GET_IDCa, GET_IMG, searchProducts } from "../api/apiService";
+import {
+  GET_ALL,
+  GET_ID,
+  GET_IDCa,
+  GET_IMG,
+  searchProducts,
+} from "../api/apiService";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import { useNavigation } from "expo-router";
 import ItemProductSale from "./items/itemProductSale";
 const Feed = ({ navigation, route }: { route: any; navigation: any }) => {
- 
   const [isLoading, setIsLoading] = useState(true);
   const { username = "Guest" } = route.params || {};
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null); // Lưu category đã chọn
   const [categoryProducts, setCategoryProducts] = useState([]); // Lưu sản phẩm theo category
-  
+
   useEffect(() => {
     const fetchCategories = async () => {
-        try {
-            const response = await GET_ALL("categories");
-            console.log("API response:", response); // Kiểm tra phản hồi API
-    
-            if (response && Array.isArray(response.content)) {
-                setCategories(response.content);
-            } else {
-                console.error("Unexpected response format:", response);
-            }
-        } catch (error) {
-            console.error("Failed to fetch categories:", error);
-        } finally {
-            setIsLoading(false);
+      try {
+        const response = await GET_ALL("categories");
+        console.log("API response:", response); // Kiểm tra phản hồi API
+
+        if (response && Array.isArray(response.content)) {
+          setCategories(response.content);
+        } else {
+          console.error("Unexpected response format:", response);
         }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchCategories();
-}, []);
-console.log("Categories", categories);
-useEffect(() => {
-  const fetchProductsByCategory = async () => {
-    if (!selectedCategory?.categoryId) return; // Check if categoryId is valid
+  }, []);
+  console.log("Categories", categories);
+  useEffect(() => {
+    const fetchProductsByCategory = async () => {
+      if (!selectedCategory?.categoryId) return; // Check if categoryId is valid
 
-    try {
-      // Call API to get products by category ID
-      const response = await GET_IDCa("categories", selectedCategory.categoryId);
-
-      console.log("API Response:", response);
-
-      if (response && Array.isArray(response.content)) {
-        // Filter products by matching categoryId
-        const filteredProducts = response.content.filter(
-          (product) => product.category && product.category.categoryId === selectedCategory.categoryId
+      try {
+        // Call API to get products by category ID
+        const response = await GET_IDCa(
+          "categories",
+          selectedCategory.categoryId
         );
 
-        setCategoryProducts(filteredProducts); // Set products for the category
+        console.log("API Response:", response);
 
-        console.log("Filtered Products:", filteredProducts);
-      } else {
-        console.error("Unexpected response format:", response);
+        if (response && Array.isArray(response.content)) {
+          // Filter products by matching categoryId
+          const filteredProducts = response.content.filter(
+            (product) =>
+              product.category &&
+              product.category.categoryId === selectedCategory.categoryId
+          );
+
+          setCategoryProducts(filteredProducts); // Set products for the category
+
+          console.log("Filtered Products:", filteredProducts);
+        } else {
+          console.error("Unexpected response format:", response);
+          setCategoryProducts([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch products by category:", error);
         setCategoryProducts([]);
       }
-    } catch (error) {
-      console.error("Failed to fetch products by category:", error);
-      setCategoryProducts([]);
-    }
-  };
+    };
 
-  fetchProductsByCategory(); // Trigger on selectedCategory change
-}, [selectedCategory]);
+    fetchProductsByCategory(); // Trigger on selectedCategory change
+  }, [selectedCategory]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -127,9 +137,9 @@ useEffect(() => {
           sortBy: "productId",
           sortOrder: "asc",
         });
-  
+
         console.log("Response từ GET_ALL products:", response);
-  
+
         if (response && Array.isArray(response.content)) {
           // Duyệt qua các sản phẩm để tính và thêm giá sale
           const productsWithSalePrice = response.content.map((product) => {
@@ -138,7 +148,7 @@ useEffect(() => {
             }
             return product;
           });
-  
+
           setProducts(productsWithSalePrice); // Đặt danh sách sản phẩm bao gồm giá sale vào state
         } else {
           console.error("Định dạng phản hồi không đúng:", response);
@@ -149,26 +159,24 @@ useEffect(() => {
         setIsLoading(false); // Dừng tải sau khi gọi API xong
       }
     };
-  
+
     fetchProductsSale(); // Gọi hàm khi component được render lần đầu
   }, []);
-  
-    // Xử lý khi thay đổi input tìm kiếm
-    const handleSearchInputChange = useCallback((query) => {
-      setSearchQuery(query);
-    }, []);
-  
-    // Xử lý khi bấm tìm kiếm
-    const handleSearchSubmit = () => {
-      if (searchQuery.trim()) {
-        navigation.navigate("SearchResults", { query: searchQuery });
-      }
-    };
-    const handleCategoryPress = (category) => {
-      setSelectedCategory(category); // Cập nhật category đã chọn
-    };
-    
-  
+
+  // Xử lý khi thay đổi input tìm kiếm
+  const handleSearchInputChange = useCallback((query) => {
+    setSearchQuery(query);
+  }, []);
+
+  // Xử lý khi bấm tìm kiếm
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      navigation.navigate("SearchResults", { query: searchQuery });
+    }
+  };
+  const handleCategoryPress = (category) => {
+    setSelectedCategory(category); // Cập nhật category đã chọn
+  };
 
   return (
     <ScrollView
@@ -181,15 +189,23 @@ useEffect(() => {
           <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
         </TouchableOpacity>
 
-       
-      <Text style={styles.greeting}>Cộng Cà Phê</Text>
-      <Image style={styles.img} source={require('../../assets/images/logo111.png')} />
+        <Text style={styles.greeting}>Cộng Cà Phê</Text>
+        <Image
+          style={styles.img}
+          source={require("../../assets/images/logo111.png")}
+        />
       </View>
 
       {/* Search Bar */}
-         {/* Search Bar */}
+      {/* Search Bar */}
       <View style={styles.searchBarContainer}>
-        <Feather name="search" style={styles.searchIcon} size={24} color="black" onPress={handleSearchSubmit} />
+        <Feather
+          name="search"
+          style={styles.searchIcon}
+          size={24}
+          color="black"
+          onPress={handleSearchSubmit}
+        />
         <TextInput
           style={styles.searchBar}
           placeholder="Tìm kiếm sản phẩm..."
@@ -234,156 +250,164 @@ useEffect(() => {
       <Text style={styles.text}>Danh mục</Text>
 
       <View style={styles.categories}>
-  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-    {categories.map((category, index) => (
-      <TouchableOpacity
-        key={index}
-        style={styles.categoryButton}
-        onPress={() => handleCategoryPress(category)} // Chọn category
-      >
-        <FontAwesome
-          name={category.icon || "coffee"} // Tên icon của category
-          style={styles.categoryIcon}
-          size={16}
-          color="black"
-        />
-        <Text style={styles.categoryText}>
-          {category.categoryName} {/* Tên category */}
-        </Text>
-      </TouchableOpacity>
-    ))}
-  </ScrollView>
-</View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {categories.map((category, index) => (
+            <TouchableOpacity
+              key={category.categoryId || category.categoryName || index}
+              style={styles.categoryButton}
+              onPress={() => handleCategoryPress(category)} // Chọn category
+            >
+              <FontAwesome
+                name={category.icon || "coffee"} // Tên icon của category
+                style={styles.categoryIcon}
+                size={16}
+                color="black"
+              />
+              <Text style={styles.categoryText}>
+                {category.categoryName} {/* Tên category */}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
       {/* Coffee Cards */}
-   {/* Coffee Cards */}
-<ScrollView
-  style={styles.coffeeList}
-  horizontal={true}
-  showsHorizontalScrollIndicator={false}
->
-  <View style={styles.content}>
-    {isLoading ? (
-      <Text>Loading...</Text>
-    ) : categoryProducts.length > 0 ? (
-      categoryProducts.map((coffee) => (
-        <TouchableHighlight
-          key={coffee.product_id} // Gán key tại đây
-          style={{ marginBottom: 20, borderRadius: 15 }}
-          activeOpacity={0.0}
-          underlayColor="#fff"
-          onPress={() => {
-            const updateCoffee = { ...coffee, total: coffee.price };
-            navigation.navigate("ProductDetail", { coffee: updateCoffee });
-          }}
-        >
-          <ItemHome
-            imageSource={GET_IMG("products/image", coffee.image)}
-            textContent={coffee.productName}
-            textPrice={coffee.price}
-            textPriceSale={coffee.specialPrice}
-          />
-        </TouchableHighlight>
-      ))
-    ) : (
-      products.map((coffee) => (
-        <TouchableHighlight
-          key={coffee.product_id} // Gán key tại đây
-          style={{ marginBottom: 20, borderRadius: 15 }}
-          activeOpacity={0.0}
-          underlayColor="#fff"
-          onPress={() => {
-            const updateCoffee = { ...coffee, total: coffee.price };
-            navigation.navigate("ProductDetail", { coffee: updateCoffee });
-          }}
-        >
-          <ItemHome
-            imageSource={GET_IMG("products/image", coffee.image)}
-            textContent={coffee.productName}
-             textPrice={coffee.price}
-            textPriceSale={coffee.specialPrice}
-          />
-        </TouchableHighlight>
-      ))
-    )}
-  </View>
-</ScrollView>
-<Text style={styles.text}>Sản phẩm giảm giá</Text>
-{/* Discounted Coffee Cards Section */}
-<ScrollView
-  style={styles.coffeeList}
-  horizontal={true}
-  showsHorizontalScrollIndicator={false}
->
-  <View style={styles.content}>
-    {isLoading ? (
-      <Text>Loading...</Text>
-    ) : products.filter((coffee) => coffee.discount > 0).length > 0 ? (
-      // Only show products with a discount
-      products
-        .filter((coffee) => coffee.discount > 0)
-        .map((coffee) => (
-          <TouchableHighlight
-            key={coffee.product_id}
-            style={{ marginBottom: 20, borderRadius: 15 }}
-            activeOpacity={0.0}
-            underlayColor="#fff"
-            onPress={() => {
-              const updateCoffee = { ...coffee, total: coffee.price };
-              navigation.navigate("ProductDetail", { coffee: updateCoffee });
-            }}
-          >
-            <ItemProductSale
-              imageSource={GET_IMG("products/image", coffee.image)}
-              textContent={coffee.productName}
-              textPrice={coffee.price}
-              textPriceSale={coffee.specialPrice} // Assuming salePrice is calculated
-            />
-          </TouchableHighlight>
-        ))
-    ) : (
-      <Text>No discounted products available</Text>
-    )}
-  </View>
-</ScrollView>
-<Text style={styles.text}>Sản phẩm mới nhất</Text>
-{/* New Coffee Cards Section */}
-<ScrollView
-  style={styles.coffeeList}
-  horizontal={true}
-  showsHorizontalScrollIndicator={false}
->
-  <View style={styles.content}>
-    {isLoading ? (
-      <Text>Loading...</Text>
-    ) : products.length > 0 ? (
-      // Sort by product_id in descending order to get the newest products
-      products
-        .sort((a, b) => b.productId - a.productId) // Sort by highest product_id first
-        .slice(0, 10) // Get the top 10 products (newest)
-        .map((coffee) => (
-          <TouchableHighlight
-            key={coffee.product_id}
-            style={{ marginBottom: 20, borderRadius: 15 }}
-            activeOpacity={0.0}
-            underlayColor="#fff"
-            onPress={() => {
-              const updateCoffee = { ...coffee, total: coffee.price };
-              navigation.navigate("ProductDetail", { coffee: updateCoffee });
-            }}
-          >
-            <ItemHome
-              imageSource={GET_IMG("products/image", coffee.image)}
-              textContent={coffee.productName}
-              textPrice={coffee.price}
-              textPriceSale={coffee.specialPrice} // Assuming salePrice is calculated
-            />
-          </TouchableHighlight>
-        ))
-    ) : (
-      <Text>No new products available</Text>
-    )}
-  </View>
-</ScrollView>
+      {/* Coffee Cards */}
+      <ScrollView
+        style={styles.coffeeList}
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+      >
+        <View style={styles.content}>
+          {isLoading ? (
+            <Text>Loading...</Text>
+          ) : categoryProducts.length > 0 ? (
+            categoryProducts.map((coffee, index) => (
+              <TouchableHighlight
+                key={coffee?.product_id || index} // Gán key tại đây
+                style={{ marginBottom: 20, borderRadius: 15 }}
+                activeOpacity={0.0}
+                underlayColor="#fff"
+                onPress={() => {
+                  const updateCoffee = { ...coffee, total: coffee.price };
+                  navigation.navigate("ProductDetail", {
+                    coffee: updateCoffee,
+                  });
+                }}
+              >
+                <ItemHome
+                  imageSource={GET_IMG("products/image", coffee.image)}
+                  textContent={coffee.productName}
+                  textPrice={coffee.price}
+                  textPriceSale={coffee.specialPrice}
+                />
+              </TouchableHighlight>
+            ))
+          ) : (
+            products.map((coffee, index) => (
+              <TouchableHighlight
+                key={coffee.product_id || index} // Gán key tại đây
+                style={{ marginBottom: 20, borderRadius: 15 }}
+                activeOpacity={0.0}
+                underlayColor="#fff"
+                onPress={() => {
+                  const updateCoffee = { ...coffee, total: coffee.price };
+                  navigation.navigate("ProductDetail", {
+                    coffee: updateCoffee,
+                  });
+                }}
+              >
+                <ItemHome
+                  imageSource={GET_IMG("products/image", coffee.image)}
+                  textContent={coffee.productName}
+                  textPrice={coffee.price}
+                  textPriceSale={coffee.specialPrice}
+                />
+              </TouchableHighlight>
+            ))
+          )}
+        </View>
+      </ScrollView>
+      <Text style={styles.text}>Sản phẩm giảm giá</Text>
+      {/* Discounted Coffee Cards Section */}
+      <ScrollView
+        style={styles.coffeeList}
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+      >
+        <View style={styles.content}>
+          {isLoading ? (
+            <Text>Loading...</Text>
+          ) : products.filter((coffee) => coffee.discount > 0).length > 0 ? (
+            // Only show products with a discount
+            products
+              .filter((coffee) => coffee.discount > 0)
+              .map((coffee, index) => (
+                <TouchableHighlight
+                  key={coffee.product_id || index}
+                  style={{ marginBottom: 20, borderRadius: 15 }}
+                  activeOpacity={0.0}
+                  underlayColor="#fff"
+                  onPress={() => {
+                    const updateCoffee = { ...coffee, total: coffee.price };
+                    navigation.navigate("ProductDetail", {
+                      coffee: updateCoffee,
+                    });
+                  }}
+                >
+                  <ItemProductSale
+                    imageSource={GET_IMG("products/image", coffee.image)}
+                    textContent={coffee.productName}
+                    textPrice={coffee.price}
+                    textPriceSale={coffee.specialPrice} // Assuming salePrice is calculated
+                  />
+                </TouchableHighlight>
+              ))
+          ) : (
+            <Text>No discounted products available</Text>
+          )}
+        </View>
+      </ScrollView>
+      <Text style={styles.text}>Sản phẩm mới nhất</Text>
+      {/* New Coffee Cards Section */}
+      <ScrollView
+        style={styles.coffeeList}
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+      >
+        <View style={styles.content}>
+          {isLoading ? (
+            <Text>Loading...</Text>
+          ) : products.length > 0 ? (
+            // Sort by product_id in descending order to get the newest products
+            products
+              .sort((a, b) => b.productId - a.productId) // Sort by highest product_id first
+              .slice(0, 10) // Get the top 10 products (newest)
+              .map((coffee, index) => (
+                <TouchableHighlight
+                  key={coffee.product_id || index}
+                  style={{ marginBottom: 20, borderRadius: 15 }}
+                  activeOpacity={0.0}
+                  underlayColor="#fff"
+                  onPress={() => {
+                    const updateCoffee = { ...coffee, total: coffee.price };
+                    navigation.navigate("ProductDetail", {
+                      coffee: updateCoffee,
+                    });
+                  }}
+                >
+                  <ItemHome
+                    imageSource={GET_IMG("products/image", coffee.image)}
+                    textContent={coffee.productName}
+                    textPrice={coffee.price}
+                    textPriceSale={coffee.specialPrice} // Assuming salePrice is calculated
+                  />
+                </TouchableHighlight>
+              ))
+          ) : (
+            <Text>No new products available</Text>
+          )}
+        </View>
+      </ScrollView>
 
       {/* Special Offer Section */}
       <View style={styles.specialOfferContainer}>
@@ -419,16 +443,14 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 18,
- marginRight:-160,
-    color: '#333',
-    fontWeight: 'bold',
-    
-    
-},
-img:{
-  width:30,
-  height:30,
-},
+    marginRight: -160,
+    color: "#333",
+    fontWeight: "bold",
+  },
+  img: {
+    width: 30,
+    height: 30,
+  },
   profileImage: {
     width: 40,
     height: 40,
@@ -485,7 +507,7 @@ img:{
   },
   text: {
     fontSize: 30,
-    margin: 20,
+    margin: 30,
   },
 
   coffeeList: {
@@ -603,4 +625,3 @@ img:{
 function debounce(arg0: (query: any) => Promise<void>, arg1: number) {
   throw new Error("Function not implemented.");
 }
-

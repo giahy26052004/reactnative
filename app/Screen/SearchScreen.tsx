@@ -1,5 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, Image, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { searchProducts } from "../api/apiService";
 import { callApi } from "../api/apiService";
@@ -39,11 +47,10 @@ const SearchResults = () => {
   const handleProductClick = (product) => {
     navigation.navigate("ProductDetail", { coffee: product }); // Điều hướng với dữ liệu sản phẩm đầy đủ
   };
-  console.log("Sản phẩm: ",products);
+  console.log("Sản phẩm: ", products);
   return (
-    
     <ScrollView contentContainerStyle={styles.container}>
-            <TouchableOpacity  onPress={()=>navigation.navigate('Home')}>
+      <TouchableOpacity onPress={() => navigation.navigate("Home")}>
         <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
       </TouchableOpacity>
 
@@ -54,15 +61,17 @@ const SearchResults = () => {
       )}
       {!loading && products.length > 0 && (
         <View style={styles.productList}>
-          {products.map((product) => (
+          {products.map((product, index) => (
             <TouchableOpacity
-            key={product.product_id}
-            style={styles.productCard}
-            onPress={() => handleProductClick(product)} // Truyền cả đối tượng sản phẩm
-          >
+              key={product.product_id || index}
+              style={styles.productCard}
+              onPress={() => handleProductClick(product)} // Truyền cả đối tượng sản phẩm
+            >
               <View style={styles.imageContainer}>
                 <Image
-                  source={{ uri: `http://localhost:8080/api/public/products/image/${product.image}` }}
+                  source={{
+                    uri: `http://localhost:8080/api/public/products/image/${product.image}`,
+                  }}
                   style={styles.productImage}
                   resizeMode="cover"
                 />
